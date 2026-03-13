@@ -23,6 +23,12 @@ impl ArgVals {
         self.simple_vals.iter().any(|s| s == symbol)
     }
 
+    pub fn key_value_pairs<N: Copy + FromStr>(&self) -> impl Iterator<Item = (&str, N)> {
+        self.mapped_vals
+            .iter()
+            .filter_map(|(k, v)| v.parse::<N>().map(|v| (k.as_str(), v)).ok())
+    }
+
     pub fn get_value<N: Copy + FromStr>(&self, key: &str) -> Option<N> {
         self.mapped_vals
             .get(key)
