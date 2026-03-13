@@ -1,6 +1,6 @@
 use std::{collections::HashMap, str::FromStr};
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct ArgVals {
     simple_vals: Vec<String>,
     mapped_vals: HashMap<String, String>,
