@@ -47,6 +47,10 @@ impl ArgVals {
             .iter()
             .filter_map(|(k, v)| v.parse::<N>().map(|v| (k.as_str(), v)).ok())
     }
+    
+    pub fn get_str_value(&self, key: &str) -> Option<&String> {
+        self.mapped_vals.get(key)
+    }
 
     pub fn get_value<N: Copy + FromStr>(&self, key: &str) -> Option<N> {
         self.mapped_vals
