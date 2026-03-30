@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fmt::Display, str::FromStr};
+use std::{collections::{HashMap,BTreeMap}, fmt::Display, str::FromStr};
 
 pub fn assignment_param(arg: &str) -> Option<(&str, &str)> {
     arg.find('=').map(|eq| (&arg[..eq], &arg[eq + 1..]))
@@ -76,7 +76,7 @@ impl ArgVals {
 
 pub struct ArgDocs {
     executable_name: String,
-    arg2type_default: HashMap<String, (String, Option<String>)>,
+    arg2type_default: BTreeMap<String, (String, Option<String>)>,
 }
 
 pub fn merged_arg_docs<'a, A: Iterator<Item = &'a ArgDocs>>(
@@ -147,11 +147,10 @@ impl Display for ArgDocs {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "Usage: {}", self.executable_name)?;
         for (assign, (assign_type, def)) in self.arg2type_default.iter() {
-            write!(f, "\t\n{assign}={assign_type}")?;
+            write!(f, "\n\t{assign}={assign_type}")?;
             if let Some(d) = def {
                 write!(f, " [{d}]")?;
             }
-            writeln!(f)?;
         }
         Ok(())
     }
