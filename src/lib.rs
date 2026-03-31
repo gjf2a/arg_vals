@@ -130,6 +130,16 @@ impl ArgDocs {
         }
     }
 
+    pub fn set_default(&mut self, arg: &str, arg_default: &str) -> anyhow::Result<()> {
+        match self.arg2type_default.get_mut(arg) {
+            None => Err(anyhow::anyhow!("Missing argument: {arg}")),
+            Some((_,current)) => {
+                *current = Some(arg_default.to_string());
+                Ok(())
+            }
+        }
+    }
+
     pub fn get_args_with_defaults(&self) -> ArgVals {
         let mut result = ArgVals::env();
         for (arg, (_, def)) in self.arg2type_default.iter() {
