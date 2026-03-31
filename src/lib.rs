@@ -74,6 +74,7 @@ impl ArgVals {
     }
 }
 
+#[derive(Clone, Debug)]
 pub struct ArgDocs {
     executable_name: String,
     arg2type_default: BTreeMap<String, (String, Option<String>)>,
