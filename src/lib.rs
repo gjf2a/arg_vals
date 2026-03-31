@@ -1,4 +1,8 @@
-use std::{collections::{HashMap,BTreeMap}, fmt::Display, str::FromStr};
+use std::{
+    collections::{BTreeMap, HashMap},
+    fmt::Display,
+    str::FromStr,
+};
 
 pub fn assignment_param(arg: &str) -> Option<(&str, &str)> {
     arg.find('=').map(|eq| (&arg[..eq], &arg[eq + 1..]))
@@ -80,11 +84,9 @@ pub struct ArgDocs {
     arg2type_default: BTreeMap<String, (String, Option<String>)>,
 }
 
-pub fn merged_arg_docs<'a, A: Iterator<Item = &'a ArgDocs>>(
-    executable_name: &str,
-    arg_docs: A,
-) -> ArgDocs {
-    let mut result = ArgDocs::new(executable_name, &vec![]);
+pub fn merged_arg_docs<'a, A: Iterator<Item = &'a ArgDocs>>(arg_docs: A) -> ArgDocs {
+    let executable_name = std::env::args().next().unwrap();
+    let mut result = ArgDocs::new(&executable_name, &vec![]);
     for arg_doc in arg_docs {
         for (arg, (arg_type, arg_default)) in arg_doc.arg2type_default.iter() {
             match result.arg2type_default.get_mut(arg) {
@@ -134,7 +136,7 @@ impl ArgDocs {
     pub fn set_default(&mut self, arg: &str, arg_default: &str) -> anyhow::Result<()> {
         match self.arg2type_default.get_mut(arg) {
             None => Err(anyhow::anyhow!("Missing argument: {arg}")),
-            Some((_,current)) => {
+            Some((_, current)) => {
                 *current = Some(arg_default.to_string());
                 Ok(())
             }
