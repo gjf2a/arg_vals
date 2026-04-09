@@ -146,7 +146,7 @@ impl ArgDocs {
     pub fn get_args_with_defaults(&self) -> ArgVals {
         let mut result = ArgVals::env();
         for (arg, (_, def)) in self.arg2type_default.iter() {
-            if assignment_param(arg).is_some() && result.get_str_value(arg).is_err() {
+            if result.get_str_value(arg).is_err() {
                 if let Some(default_def) = def {
                     result.add_mapping(arg, default_def);
                 }
