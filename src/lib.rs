@@ -48,10 +48,21 @@ impl ArgVals {
         if let Some(str_value) = self.mapped_vals.get(key) {
             match str_value.parse::<N>() {
                 Ok(n) => Ok(n),
-                Err(_) => Err(anyhow::anyhow!("Error parsing {str_value}")),
+                Err(_) => anyhow::bail!("Error parsing {str_value}"),
             }
         } else {
-            Err(anyhow::anyhow!("{key} missing"))
+            anyhow::bail!("{key} missing")
+        }
+    }
+
+    pub fn get_optional_value<N: Copy + FromStr>(&self, key: &str) -> anyhow::Result<Option<N>> {
+        if let Some(str_value) = self.mapped_vals.get(key) {
+            match str_value.parse::<N>() {
+                Ok(n) => Ok(Some(n)),
+                Err(_) => anyhow::bail!("Error parsing {str_value}"),
+            }
+        } else {
+            Ok(None)
         }
     }
 
@@ -195,7 +206,7 @@ mod tests {
     }
 
     #[test]
-    fn test() {
+    fn test_arg_vals() {
         let arg_vals = ArgVals {
             mapped_vals: hash_map! {
                 "--meters-per-cell".to_string() => "0.1".to_string(),
@@ -214,7 +225,7 @@ mod tests {
     }
 
     #[test]
-    fn test2() {
+    fn test_arg_docs() {
         let arg_docs = ArgDocs::new(
             "bit_slam_node",
             &vec![
@@ -223,6 +234,7 @@ mod tests {
                 ("--meters-per-cell", "f64", "0.1"),
                 ("--save-map", "bool", "true"),
                 ("--tester", "Tester", "Test1"),
+                ("--period", "Option<usize>", "100"),
             ],
         );
 
@@ -232,5 +244,7 @@ mod tests {
         assert_eq!(vals.get_value::<f64>("--meters-per-cell").unwrap(), 0.1);
         assert_eq!(vals.get_value::<bool>("--save-map").unwrap(), true);
         assert_eq!(vals.get_value::<Tester>("--tester").unwrap(), Tester::Test1);
+        assert_eq!(vals.get_optional_value::<usize>("--period").unwrap(), Some(100));
+        assert_eq!(vals.get_optional_value::<usize>("--limit").unwrap(), None);
     }
 }
