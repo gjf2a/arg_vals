@@ -168,3 +168,69 @@ impl Display for ArgDocs {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use std::str::FromStr;
+
+    use crate::{ArgDocs, ArgVals};
+    use map_macro::hash_map;
+
+    #[derive(Copy, Clone, PartialEq, Eq, Debug)]
+    enum Tester {
+        Test1,
+        Test2,
+    }
+
+    impl FromStr for Tester {
+        type Err = anyhow::Error;
+
+        fn from_str(s: &str) -> Result<Self, Self::Err> {
+            match s {
+                "Test1" => Ok(Self::Test1),
+                "Test2" => Ok(Self::Test2),
+                _ => anyhow::bail!("Unrecognized alternative: {s}"),
+            }
+        }
+    }
+
+    #[test]
+    fn test() {
+        let arg_vals = ArgVals {
+            mapped_vals: hash_map! {
+                "--meters-per-cell".to_string() => "0.1".to_string(),
+                "--robot".to_string() => "archangel".to_string(),
+                "--num-particles".to_string() => "1000".to_string(),
+                "--save-map".to_string() => "true".to_string()
+            },
+        };
+        assert_eq!(arg_vals.get_value::<f64>("--meters-per-cell").unwrap(), 0.1);
+        assert_eq!(arg_vals.get_str_value("--robot").unwrap(), "archangel");
+        assert_eq!(arg_vals.get_value::<bool>("--save-map").unwrap(), true);
+        assert_eq!(
+            arg_vals.get_value::<usize>("--num-particles").unwrap(),
+            1000
+        );
+    }
+
+    #[test]
+    fn test2() {
+        let arg_docs = ArgDocs::new(
+            "bit_slam_node",
+            &vec![
+                ("--robot", "str", "archangel"),
+                ("--num-particles", "usize", "1000"),
+                ("--meters-per-cell", "f64", "0.1"),
+                ("--save-map", "bool", "true"),
+                ("--tester", "Tester", "Test1"),
+            ],
+        );
+
+        let vals = arg_docs.get_args_with_defaults();
+        assert_eq!(vals.get_str_value("--robot").unwrap(), "archangel");
+        assert_eq!(vals.get_value::<usize>("--num-particles").unwrap(), 1000);
+        assert_eq!(vals.get_value::<f64>("--meters-per-cell").unwrap(), 0.1);
+        assert_eq!(vals.get_value::<bool>("--save-map").unwrap(), true);
+        assert_eq!(vals.get_value::<Tester>("--tester").unwrap(), Tester::Test1);
+    }
+}

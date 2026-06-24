@@ -13,4 +13,11 @@ name = "arg_vals"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "map-macro",
 ]
+
+[[package]]
+name = "map-macro"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fb950a42259642e5a3483115aca87eebed2a64886993463af9c9739c205b8d3a"
