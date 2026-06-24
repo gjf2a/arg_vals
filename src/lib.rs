@@ -57,9 +57,13 @@ impl ArgVals {
 
     pub fn get_optional_value<N: Copy + FromStr>(&self, key: &str) -> anyhow::Result<Option<N>> {
         if let Some(str_value) = self.mapped_vals.get(key) {
-            match str_value.parse::<N>() {
-                Ok(n) => Ok(Some(n)),
-                Err(_) => anyhow::bail!("Error parsing {str_value}"),
+            if str_value == "None" {
+                Ok(None)
+            } else {
+                match str_value.parse::<N>() {
+                    Ok(n) => Ok(Some(n)),
+                    Err(_) => anyhow::bail!("Error parsing {str_value}"),
+                }
             }
         } else {
             Ok(None)
@@ -235,6 +239,7 @@ mod tests {
                 ("--save-map", "bool", "true"),
                 ("--tester", "Tester", "Test1"),
                 ("--period", "Option<usize>", "100"),
+                ("--limit", "Option<usize>", "None"),
             ],
         );
 
@@ -246,5 +251,6 @@ mod tests {
         assert_eq!(vals.get_value::<Tester>("--tester").unwrap(), Tester::Test1);
         assert_eq!(vals.get_optional_value::<usize>("--period").unwrap(), Some(100));
         assert_eq!(vals.get_optional_value::<usize>("--limit").unwrap(), None);
+        assert_eq!(vals.get_optional_value::<usize>("--lit").unwrap(), None);
     }
 }
